@@ -1,0 +1,92 @@
+version: '2'
+services:
+
+    arches:
+      container_name: archestest
+      image: arches:latest
+      build:
+        context: .
+        dockerfile: ./Dockerfile
+      command: run_arches
+      volumes:
+        - arches-log:/arches/arches/logs
+        - arches-static:/static_root
+        - ./danam:/web_root/danam
+      #  - ./archesweb:/web_root/arches
+      environment:
+        - ARCHES_PROJECT=danam
+        - INSTALL_DEFAULT_GRAPHS=False
+        - INSTALL_DEFAULT_CONCEPTS=False
+        - PGUSERNAME=postgres
+        - PGPASSWORD=postgres
+        - PGDBNAME=arches
+        - PGHOST=db
+        - PGPORT=5432
+        - COUCHDB_HOST=couchdb
+        - COUCHDB_PORT=5984
+        - COUCHDB_USER=admin
+        - COUCHDB_PASS=password
+        - ESHOST=elasticsearch
+        - ESPORT=9200
+        - ELASTICSEARCH_PREFIX=danam
+        - DJANGO_MODE=DEV
+        - DJANGO_DEBUG=True
+        # - DJANGO_REMOTE_DEBUG=False
+        - DOMAIN_NAMES=localhost
+        - PYTHONUNBUFFERED=0
+        - TZ=PST
+      ports:
+        - '8000:8000'
+      depends_on:
+        - db
+        - elasticsearch
+        - couchdb
+
+  
+    db:
+      container_name: dbtest
+      image: postgres:latest
+      volumes:
+          - ./postgresdata:/var/lib/postgresql/data
+          - postgres-log:/var/log/postgresql
+      ports:
+        - '5432:5432'
+      environment:
+        - POSTGRES_PASSWORD=postgres
+        - TZ=PST
+
+    couchdb:
+      container_name: couchdbtest
+      image: couch:latest
+      ports:
+        - "5984:5984"
+      environment:
+        COUCHDB_USER: admin
+        COUCHDB_PASSWORD: password
+      volumes:
+        -  ./couchdb:/usr/local/var/lib/couchdb
+        - couchdb-log:/usr/local/var/log/couchdb
+
+    elasticsearch:
+      container_name: elasticsearchtest
+      image: elastic:latest
+      volumes:
+        - ./elasticdata:/usr/share/elasticsearch/data
+      ports:
+        - "9200:9200"
+        - "9300:9300"
+      environment:
+        - TZ=PST
+
+   
+volumes:
+    arches-log:
+    arches-static:
+    couchdb-data: 
+    couchdb-log:
+    postgres-data: 
+    postgres-log:
+    elasticsearch-data:
+    letsencrypt:
+    letsencrypt-log:
+    letsencrypt-acme-challenge:
